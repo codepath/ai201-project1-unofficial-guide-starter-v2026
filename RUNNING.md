@@ -7,7 +7,7 @@ Everything about how the starter works and how to use it.
 ## Before your first class
 
 Setup happens **before class**, not during it. The
-[environment setup page](../pages/ide_setup) has the per-operating-system
+[environment setup page](https://courses.codepath.org/courses/ai201/pages/ide_setup) has the per-operating-system
 commands, the exact versions, and where to get your API key.
 
 The short version, from inside this repo after you've forked and cloned it:
