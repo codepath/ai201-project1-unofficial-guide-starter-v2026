@@ -22,6 +22,7 @@ to it, write down what you saw, and move on. That's a real observation about
 your pipeline, not giving up.
 """
 
+import re
 from dataclasses import dataclass
 
 import config
@@ -80,24 +81,126 @@ def fallback_split(
     return chunks
 
 
+MIN_CHUNK = 200   # below this a section is a heading with nothing under it
+MAX_CHUNK = 800   # cap on a finished chunk, including the context line
+
+
+def _heading_sections(text: str) -> tuple[str, list[tuple[str, str]]]:
+    """
+    Pull a document apart at its `##` headings.
+
+    Returns the document title (from the leading `#` line) and a list of
+    (heading, body) pairs. Anything before the first `##` is returned under an
+    empty heading so no text is lost.
+    """
+    lines = text.split("\n")
+    title = ""
+    sections: list[tuple[str, str]] = []
+    heading = ""
+    body: list[str] = []
+
+    for line in lines:
+        if line.startswith("## "):
+            sections.append((heading, "\n".join(body).strip()))
+            heading = line[3:].strip()
+            body = []
+        elif line.startswith("# ") and not title:
+            title = line[2:].strip()
+        else:
+            body.append(line)
+
+    sections.append((heading, "\n".join(body).strip()))
+    return title, [(h, b) for h, b in sections if b or h]
+
+
+def _split_long(body: str, budget: int) -> list[str]:
+    """Break an over-long section at sentence ends rather than mid-word."""
+    sentences = re.split(r"(?<=[.!?])\s+", body)
+    pieces: list[str] = []
+    current = ""
+
+    for sentence in sentences:
+        if current and len(current) + len(sentence) + 1 > budget:
+            pieces.append(current.strip())
+            current = sentence
+        else:
+            current = f"{current} {sentence}".strip()
+
+    if current.strip():
+        pieces.append(current.strip())
+    return pieces
+
+
 def split_documents(documents: list[Document]) -> list[Chunk]:
     """
-    Split documents into chunks. ⚠️ REPLACE THE BODY OF THIS IN MILESTONE 3.
+    Split documents at their section headings instead of by character count.
 
-    Right now it just calls the fallback. That is the plain, generic behaviour
-    the brief is talking about.
+    These guides are all built the same way: a `#` town name, then seven `##`
+    sections of two or three hundred characters each. A fixed 800-character
+    window ignores every one of those boundaries, so it ends a chunk halfway
+    through "Where to stay" and starts the next one halfway through "When to
+    go". Splitting on the headings the documents already carry keeps each
+    section whole.
 
-    When you write your own strategy, set `produced_by` to
-    "chunker.py::split_documents" so your README's Sample Chunks section names
-    the right function. `app.py chunks` prints that string for you.
+    Two things this does beyond splitting:
 
-    Things worth thinking about before you write any code:
-      - Are your documents short posts or long guides?
-      - Is the useful information in one sentence, or spread over a paragraph?
-      - Would splitting on paragraph breaks keep more thoughts intact than
-        splitting on a character count?
+      - Every chunk starts with "<town> — <section>". The town name only
+        appears once per file, in the `#` title, so a section taken on its own
+        would contain no mention of which town it describes — and nine files
+        have a near-identical "Getting there". The context line puts the town
+        back into the text that gets embedded.
+
+      - Sections under MIN_CHUNK characters are folded into the previous chunk
+        rather than stored alone, which is what produced the 24-character chunk
+        the fixed-size version left in the index.
+
+    Documents with no `##` headings fall back to fixed-size windows.
     """
-    return fallback_split(documents)
+    chunks: list[Chunk] = []
+
+    for doc in documents:
+        title, sections = _heading_sections(doc.text)
+        if not sections or not title:
+            for chunk in fallback_split([doc]):
+                chunks.append(
+                    Chunk(
+                        text=chunk.text,
+                        source=chunk.source,
+                        index=len(
+                            [c for c in chunks if c.source == doc.source]
+                        ),
+                        produced_by="chunker.py::split_documents",
+                    )
+                )
+            continue
+
+        texts: list[str] = []
+        for heading, body in sections:
+            if not body:
+                continue
+
+            context = f"{title} — {heading}" if heading else title
+            budget = MAX_CHUNK - len(context) - 2
+
+            for piece in _split_long(body, budget):
+                candidate = f"{context}\n\n{piece}"
+                # A section too short to stand alone joins the one before it.
+                if len(candidate) < MIN_CHUNK and texts:
+                    texts[-1] = f"{texts[-1]}\n\n{piece}"
+                else:
+                    texts.append(candidate)
+
+        for index, text in enumerate(texts):
+            chunks.append(
+                Chunk(
+                    text=text,
+                    source=doc.source,
+                    index=index,
+                    produced_by="chunker.py::split_documents",
+                )
+            )
+
+    return chunks
 
 
 def describe(chunks: list[Chunk]) -> str:
