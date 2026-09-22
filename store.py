@@ -63,7 +63,11 @@ class _OnnxEmbedder:
     def __init__(self):
         from chromadb.utils.embedding_functions import ONNXMiniLM_L6_V2
 
-        self._ef = ONNXMiniLM_L6_V2()
+        # Chroma defaults to every provider onnxruntime reports, CoreML first.
+        # On this machine CoreML fails mid-batch with "Unable to compute the
+        # prediction using a neural network model". CPU is the only provider
+        # that matters here anyway — the model is tiny and runs in seconds.
+        self._ef = ONNXMiniLM_L6_V2(preferred_providers=["CPUExecutionProvider"])
 
     def encode(self, texts, show_progress_bar: bool = False):
         return [vector.tolist() for vector in self._ef(list(texts))]
