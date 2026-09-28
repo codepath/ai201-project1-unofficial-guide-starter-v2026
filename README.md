@@ -236,17 +236,8 @@ Yes. The improvement lifted Criterion 1 from MISSED (3/5) to MET (4/5). Q2 now a
 
 ## What's Still Broken
 
-<!-- For each criterion still missed after your fix: what you'd do about it,
-     and why you stopped where you did.
-
-     "I ran out of time" is fine if it's true. Pretending nothing is left is
-     not.
-
-     Milestone 5. -->
+Q4 (the Brightwater landmark question) still refuses to answer even after loosening the prompt. Chunks about Brightwater are retrieved but the model won't extract the information. I'd try hybrid search next to see if mixing keyword matching with semantic search helps Q4 find better matching chunks. I stopped after one improvement because I wanted to show the full cycle cleanly: one problem, one fix, measured results. More rounds would take more time.
 
 ## What I'd Do Differently
 
-<!-- Knowing what you know now — which of your five criteria would you write
-     differently, and why?
-
-     Milestone 5. -->
+Criterion 2 is too strict. "Every answer names a source" doesn't account for refusals. When the system says "I don't have information," it's a different failure than when it answers wrong. Next time I'd split this into two: one criterion for "answers that are given are sourced" and one for "the system handles out-of-corpus well." That way I'm measuring the right thing instead of punishing refusals the same way as wrong answers.
