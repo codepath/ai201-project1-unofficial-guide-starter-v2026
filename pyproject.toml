@@ -1,0 +1,25 @@
+[project]
+name = "ai201-project1-unofficial-guide-starter-v2026"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "SriVinayA", email = "srivinay.appari@gmail.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "chromadb>=0.6,<0.7",
+    "flask>=3.0,<3.2",
+    "google-genai>=1.0,<2.0",
+    "gunicorn>=23.0,<24.0",
+    "posthog>=3.0,<4.0",
+    "python-dotenv>=1.0,<1.2",
+    "rank-bm25>=0.2.2,<0.3",
+]
+
+[project.scripts]
+ai201-project1-unofficial-guide-starter-v2026 = "ai201_project1_unofficial_guide_starter_v2026:main"
+
+[build-system]
+requires = ["uv_build>=0.12.18,<0.13.0"]
+build-backend = "uv_build"
