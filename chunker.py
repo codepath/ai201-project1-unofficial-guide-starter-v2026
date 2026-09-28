@@ -82,22 +82,50 @@ def fallback_split(
 
 def split_documents(documents: list[Document]) -> list[Chunk]:
     """
-    Split documents into chunks. ⚠️ REPLACE THE BODY OF THIS IN MILESTONE 3.
-
-    Right now it just calls the fallback. That is the plain, generic behaviour
-    the brief is talking about.
-
-    When you write your own strategy, set `produced_by` to
-    "chunker.py::split_documents" so your README's Sample Chunks section names
-    the right function. `app.py chunks` prints that string for you.
-
-    Things worth thinking about before you write any code:
-      - Are your documents short posts or long guides?
-      - Is the useful information in one sentence, or spread over a paragraph?
-      - Would splitting on paragraph breaks keep more thoughts intact than
-        splitting on a character count?
+    Split documents into chunks by grouping paragraphs together up to a size limit,
+    ensuring we don't produce tiny 5-word header chunks.
     """
-    return fallback_split(documents)
+    chunks: list[Chunk] = []
+    chunk_size = config.CHUNK_SIZE
+    overlap = config.CHUNK_OVERLAP
+
+    for doc in documents:
+        paragraphs = [p.strip() for p in doc.text.split("\n\n") if p.strip()]
+        
+        current_chunk_text = ""
+        index = 0
+
+        for para in paragraphs:
+            # If adding this paragraph exceeds chunk_size and we already have text, save the chunk
+            if current_chunk_text and len(current_chunk_text) + len(para) + 2 > chunk_size:
+                chunks.append(
+                    Chunk(
+                        text=current_chunk_text.strip(),
+                        source=doc.source,
+                        index=index,
+                        produced_by="chunker.py::split_documents",
+                    )
+                )
+                index += 1
+                current_chunk_text = para  # start new chunk
+            else:
+                if current_chunk_text:
+                    current_chunk_text += "\n\n" + para
+                else:
+                    current_chunk_text = para
+
+        # Don't forget the last chunk
+        if current_chunk_text.strip():
+            chunks.append(
+                Chunk(
+                    text=current_chunk_text.strip(),
+                    source=doc.source,
+                    index=index,
+                    produced_by="chunker.py::split_documents",
+                )
+            )
+
+    return chunks
 
 
 def describe(chunks: list[Chunk]) -> str:
