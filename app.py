@@ -31,8 +31,10 @@ def cmd_corpora(args):
 
 
 def cmd_index(args):
-    from ingest import load_documents, describe as describe_docs
-    from chunker import split_documents, describe as describe_chunks
+    from chunker import describe as describe_chunks
+    from chunker import split_documents
+    from ingest import describe as describe_docs
+    from ingest import load_documents
     from store import build_index
 
     corpus = args.corpus or config.CORPUS
