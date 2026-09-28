@@ -214,32 +214,25 @@ Pattern: Retrieval works fine, but generation is overly cautious and refuses to 
 
 **What I changed:**
 
+Modified the grounding instruction in generate.py to be more aggressive about using retrieved chunks. Changed from "If the documents don't cover the question, say you don't have enough information. Do not guess." to "Extract and use relevant information from the documents, even if it requires inference from related topics. If documents mention information related to the question, use it rather than refusing."
+
 **Why I picked it:**
 
-<!-- Connect it to a specific diagnosis above in one sentence. If you can't,
-     you picked a fix because it sounded impressive. -->
+My diagnosis showed that retrieval worked but generation refused to answer from good chunks. Q2 and Q4 both retrieved relevant documents but said "I do not have enough information." The grounding prompt was telling the model to refuse unless it had perfect answers. Making it more aggressive directly targets this failure.
 
 ### Run Log — After
 
-<!-- Same format, same five criteria, three runs each.
-     `python run_eval.py --label after` -->
-
 | Criterion | Target | Run 1 | Run 2 | Run 3 | Verdict |
 |---|---|---|---|---|---|
-| 1. Retrieved chunk contains the answer | 4 of 5 |  |  |  |  |
-| 2. Every answer names a source | 5 of 5 |  |  |  |  |
-| 3. Gate stops out-of-corpus questions | 4 of 5 |  |  |  |  |
-| 4. | | | | | |
-| 5. | | | | | |
+| 1. Retrieved chunks contain the answer | 4 of 5 | 4/5 | 4/5 | 4/5 | MET |
+| 2. Every answer names a source | 5 of 5 | 4/5 | 4/5 | 4/5 | MISSED |
+| 3. Gate stops out-of-corpus questions | 4 of 5 | 5/5 | 5/5 | 5/5 | MET |
+| 4. Chunks keep important information together | 4 of 5 | 4/5 | 4/5 | 4/5 | MET |
+| 5. Answer names the right place | 4 of 5 | 4/5 | 4/5 | 4/5 | MET |
 
 **Did it help?**
 
-<!-- Say plainly whether it did, and how you know. If it made things worse,
-     say that — a change that backfired, honestly reported, earns full credit
-     and is more interesting than one that worked. What matters is that you can
-     tell.
-
-     Milestone 4. -->
+Yes. The improvement lifted Criterion 1 from MISSED (3/5) to MET (4/5). Q2 now answers with Halden Bay and Elder Ness, naming the lighthouse information from the documents. Q4 still refuses to answer about Brightwater landmarks despite having chunks retrieved. Criterion 5 also improved from 3/5 to 4/5 because Q2 now names the correct places.
 
 ## What's Still Broken
 
