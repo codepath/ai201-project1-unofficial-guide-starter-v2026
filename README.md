@@ -198,23 +198,17 @@ Q5: which city has valley and four villages in it
 
 ## Diagnoses
 
-<!-- For each miss: which stage caused it, and how. The stage alone isn't
-     enough — you need the mechanism.
+All three misses (Criteria 1, 2, 5) stem from the same root cause:
 
-     Not a diagnosis: "Question 3 didn't work."
-     A diagnosis:     "Question 3 asks about laundry costs. The answer is in
-                       one sentence that got split across two chunks, so
-                       neither chunk on its own contains it."
+Questions 2 and 4 fail at GENERATION stage:
+- Retrieval successfully finds relevant chunks (distances 0.459 and 0.362, both below 0.65 threshold)
+- Gate accepts them as in-corpus questions
+- But the generation step refuses to answer, saying "I do not have enough information"
+- Q2 retrieves chunks about Elder Ness and Halden Bay (which mention lighthouses), but model ignores them
+- Q4 retrieves chunks about Brightwater, but model says it doesn't know about landmarks there
+- The model is too conservative. It has the chunks but doesn't extract answers from them
 
-     The five stages: loading → chunking → embedding → retrieval → generation.
-
-     Look for a pattern. If three misses all ask about numbers, that's one
-     problem, not three.
-
-     Missed nothing? Say so, then say honestly whether your targets were set
-     low, and which one you'd tighten and to what.
-
-     Milestone 3. -->
+Pattern: Retrieval works fine, but generation is overly cautious and refuses to answer from perfectly valid chunks. The grounding prompt or model behavior needs adjustment to use retrieved chunks more aggressively.
 
 ## The Improvement
 
