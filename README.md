@@ -130,11 +130,48 @@ cards only.
 
 | Criterion | Target | Run 1 | Run 2 | Run 3 | Verdict |
 |---|---|---|---|---|---|
-| 1. Retrieved chunk contains the answer | 4 of 5 |  |  |  |  |
-| 2. Every answer names a source | 5 of 5 |  |  |  |  |
-| 3. Gate stops out-of-corpus questions | 4 of 5 |  |  |  |  |
-| 4. | | | | | |
-| 5. | | | | | |
+| 1. Retrieved chunks contain the answer | 4 of 5 | 3/5 | 3/5 | 3/5 | MISSED |
+| 2. Every answer names a source | 5 of 5 | 3/5 | 3/5 | 3/5 | MISSED |
+| 3. Gate stops out-of-corpus questions | 4 of 5 | 5/5 | 5/5 | 5/5 | MET |
+| 4. Chunks keep important information together | 4 of 5 | 4/5 | 4/5 | 4/5 | MET |
+| 5. Answer names the right place | 4 of 5 | 3/5 | 3/5 | 3/5 | MISSED |
+
+### Real Output — Criterion 1
+
+Q1: which city's has Saturday market that has run since the 1400s
+
+**Run 1:**
+- Sources:  guide_brightwater.md, guide_eating.md, guide_kestrelford.md
+- Answer:  Kestrelford's Saturday market has run since the 1400s
+- Retrieved chunks contain answer? YES
+
+Q2: which cities are closer to a lighthouse (max 3 hours away)
+
+**Run 1:**
+- Sources: guide_elder_ness.md, guide_halden_bay.md, guide_pellew_sands.md, guide_walking.md
+- Answer: Based on the provided documents, I do not have enough information to answer which cities are closer to a lighthouse.
+- Retrieved chunks contain answer? NO
+
+Q3: which cities have minor injuries units
+
+**Run 1:**
+- Sources: guide_accessibility.md, guide_brightwater.md, guide_corry_vale.md, guide_elder_ness.md, guide_halden_bay.md
+- Answer: Based on the provided documents, minor injuries units are located in Kestrelford, Halden Bay, Corry Vale, Givens Mill, and Elder Ness 
+- Retrieved chunks contain answer? YES
+
+Q4: what is the famous landmark or museum in Brightwater
+
+**Run 1:**
+- Sources: guide_brightwater.md, guide_kestrelford.md, guide_regional_transport.md, guide_seasons.md, guide_walking.md
+- Answer: I don't have enough information to answer your question from the provided documents.
+- Retrieved chunks contain answer? NO
+
+Q5: which city has valley and four villages in it
+
+**Run 1:**
+- Sources: guide_corry_vale.md, guide_walking.md
+- Answer: Based on the provided documents, Corry Vale is not a town or city, but a valley containing four villages strung along eleven miles of road
+- Retrieved chunks contain answer? YES
 
 <!-- Underneath, paste the REAL output for each criterion from one of your
      runs — the actual text your system produced, not a description of it.
@@ -153,11 +190,11 @@ cards only.
 
 | # | Criterion | Verdict | How I decided |
 |---|---|---|---|
-| 1 |  |  |  |
-| 2 |  |  |  |
-| 3 |  |  |  |
-| 4 |  |  |  |
-| 5 |  |  |  |
+| 1 | Retrieved chunks contain the answer | MISSED | Three of five questions had the answer in retrieved chunks, below my target of 4 of 5. |
+| 2 | Every answer names a source | MISSED | Only three answers named specific source files (Q1, Q3, Q5). Q2 and Q4 said "no information" without naming any guide_*.md files. Target requires all 5. |
+| 3 | Gate stops out-of-corpus questions | MET | All 5 out-of-scope questions were refused by the gate, exceeding target of 4 of 5. |
+| 4 | Chunks keep important information together | MET | Section-based chunking kept 4 of 5 sampled chunks as complete thoughts with no sentence cuts, meeting the target of 4 of 5. |
+| 5 | Answer names the right place | MISSED | Q1 correctly names Kestrelford, Q3 correctly names all 5 cities, Q5 correctly names Corry Vale. Q2 and Q4 refused to answer. 3 correct out of 5, below target of 4. |
 
 ## Diagnoses
 
