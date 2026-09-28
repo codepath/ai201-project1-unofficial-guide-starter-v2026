@@ -21,26 +21,14 @@
 
 ## What This Does
 
-<!-- Three or four sentences. Which corpus you picked, and the kinds of
-     questions your system answers. Write it for someone who has never seen
-     this repo.
-
-     Milestone 5. -->
+This project is an unofficial retrieval-augmented generation (RAG) knowledge base built on the campus_life corpus. It processes markdown and text posts detailing student experiences, housing options, course workloads, and dining halls. The system allows users to query practical student life details and returns accurate, source-attributed answers with relevance gating for out-of-scope queries.
 
 ## Chunking Strategy
 
-**Chunk size:**
-**Overlap:**
+**Chunk size:** 800 characters
+**Overlap:** 120 characters
 
-<!-- What about YOUR documents made you pick these numbers? Short posts and
-     long sectioned guides don't want the same chunking, and "800 seemed
-     reasonable" earns nothing. Point at something you noticed when you read
-     the documents in Milestone 1.
-
-     If you changed your mind partway through, say so and say why. That's worth
-     more than pretending you got it right first time.
-
-     Milestone 3. -->
+When inspecting the campus_life documents, I noticed that posts range from 1 to 3 paragraphs long, with descriptive headings followed by multi-sentence explanations. Blind character splitting resulted in orphaned headers or broken mid-sentence cuts. By grouping paragraphs dynamically up to an 800-character size limit, each chunk retains its natural paragraph structure and self-contained context.
 
 ## Sample Chunks
 
@@ -53,29 +41,58 @@
 
      Milestone 3. -->
 
-**Chunk 1** — source: `` — produced by: ``
+**Chunk 1** — source: `admin_add_drop_deadline.txt#0` — produced by: `chunker.py::split_documents`
 
 ```
+On the add/drop deadline
+
+You can add a course through the end of the second week. Dropping is a longer window — through the end of week six — but a drop after week two shows as a W on your transcript. Nothing anywhere on the registrar's site says this plainly, and students find out from each other.
 ```
 
-**Chunk 2** — source: `` — produced by: ``
+**Chunk 2** — source: `course_biol_160.txt#0` — produced by: `chunker.py::split_documents`
 
 ```
+BIOL 160 Cell Biology
+
+I lived here my sophomore year. Format is lecture three times a week with a weekly lab. Assessment: four unit tests and a cumulative final. Not curved.
+
+Expect 9 to 11 hours a week, the heaviest first-year course by reputation.
+
+The one piece of advice: the unit tests come fast, roughly every three weeks; falling behind once is very hard to recover from.
 ```
 
-**Chunk 3** — source: `` — produced by: ``
+**Chunk 3** — source: `course_hist_118_workload.txt#0` — produced by: `chunker.py::split_documents`
 
 ```
+Workload for HIST 118 Modern World History
+
+People keep asking so: a lot of reading, about 120 pages a week, but no problem sets. That's real time, not optimistic time.
+
+It's front-loaded — the first month is heavier than the rest, partly because you're learning the format.
 ```
 
-**Chunk 4** — source: `` — produced by: ``
+**Chunk 4** — source: `dining_pellew_dining_hall_followup.txt#0` — produced by: `chunker.py::split_documents`
 
 ```
+Re: Pellew Dining Hall
+
+Adding to what people have said about Pellew Dining Hall. The wait figure of 12 to 18 minutes at peak matches what I've seen. If you're trying to eat between classes, go before 11:45 and it's a different building entirely.
+
+Also worth saying: the furthest hall from anywhere, next to the athletics centre. Nobody tells you this at orientation.
 ```
 
-**Chunk 5** — source: `` — produced by: ``
+**Chunk 5** — source: `housing_innisfree_hall.txt#0` — produced by: `chunker.py::split_documents`
 
 ```
+Innisfree Hall — what it's actually like
+
+Transferred in last year, so take this with a grain of salt. Built 1991, renovated 2022. Rooms are doubles arranged as pairs sharing one bathroom between two rooms.
+
+The good: the shared-bathroom-between-two-rooms arrangement is the best compromise on campus.
+
+The bad: no air conditioning, which matters for the first three weeks of September.
+
+Laundry costs $1.75 wash, $1.75 dry, app-based. On noise: moderate; the building is L-shaped and the short wing is much quieter.
 ```
 
 ## Sample Answer
@@ -83,11 +100,14 @@
 <!-- One complete question and answer, pasted as text, with the source line
      visible. Milestone 4. -->
 
-**Question:**
+**Question:** What are the wait times at Kestrel Commons during lunch?
 
 **Answer:**
 
 ```
+Based on the provided documents, wait times at Kestrel Commons during peak hours are typically around 20 to 25 minutes.
+
+Source: dining_kestrel_commons.txt
 ```
 
 **My relevance cutoff:**
@@ -102,8 +122,18 @@
      Milestone 4. -->
 
 | Question | In corpus? | Best distance |
-|---|---|---|
-|  |  |  |
+|---|---|---:|
+| What are the wait times at Kestrel Commons during lunch? | Yes | 0.173 |
+| How late is the library open during term? | Yes | 0.461 |
+| How much does a student printing quota give you per semester? | Yes | 0.295 |
+| Is the housing lottery random for rising seniors and juniors? | Yes | 0.119 |
+| What is the penalty if I drop a course after week two? | Yes | 0.411 |
+| What is the capital of Australia? | No | 0.887 |
+| How do I fix a flat tire on a bicycle? | No | 0.802 |
+| Who won the 2018 World Cup? | No | 0.889 |
+| What's the recipe for chocolate chip cookies? | No | 0.867 |
+| What are the exchange rates for Japanese Yen? | No | 0.794 |
+
 
 ## How I Used AI
 
@@ -116,9 +146,9 @@
 
      Milestone 5. -->
 
-**1.**
+**1.** I asked Claude to help design a paragraph-aware accumulator chunking function in chunker.py that respects CHUNK_SIZE without cutting headers off. It initially split text strictly on every newline without size checks, so I modified it to accumulate text paragraphs dynamically and check size constraints before splitting.
 
-**2.**
+**2.** I asked Claude to help draft the custom criteria markdown text for my README file to articulate why my chunking strategy matches the paragraph-based nature of the short campus_life corpus. I edited the text to explicitly tie the character limits to the average length of student housing and dining posts.
 
 <!-- ── Stretch features ─────────────────────────────────────────────────────
      Doing one? Say so here BEFORE you start. A feature this README never
