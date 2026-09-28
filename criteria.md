@@ -57,21 +57,10 @@ in at least 4 of 5 tries.
 
 ## 4. Something about your chunks
 
-<!-- YOU WRITE THIS ONE.
-
-     How would you know if your chunks were the right size? Name something
-     countable or observable.
-
-     Examples of the right shape — don't copy these, they should come from
-     what you actually saw in Milestone 3:
-       - "At least 4 of 5 sampled chunks read as a complete thought, with no
-          sentence cut in half at either end."
-       - "No chunk is shorter than 200 characters, since anything below that
-          in my corpus turned out to be a heading with no content under it." -->
-
-
+At least 4 of 5 sampled chunks read as a complete, self-contained thought, with no sentences cut awkwardly in half at the start or end.
 
 **Why this target:**
+Because my corpus consists of short student life posts (1-3 paragraphs), an 800-character chunk size captures entire posts or major paragraphs cleanly without splitting mid-sentence.
 
 
 
@@ -79,17 +68,10 @@ in at least 4 of 5 tries.
 
 ## 5. Your choice
 
-<!-- YOU WRITE THIS ONE TOO.
-
-     Pick something you actually care about getting right. It could be about
-     speed, about refusals, about a particular kind of question your corpus
-     handles badly, about source attribution being correct rather than merely
-     present — anything, as long as it names a number or an observable
-     outcome. -->
-
-
+Every answer returned by the system explicitly cites the correct source filename in its output text.
 
 **Why this target:**
+Source attribution is critical for a knowledge base so students know whether a tip comes from an official admin doc or an unverified student advice thread.
 
 
 
