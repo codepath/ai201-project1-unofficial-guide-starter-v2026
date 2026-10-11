@@ -97,7 +97,21 @@ def split_documents(documents: list[Document]) -> list[Chunk]:
       - Would splitting on paragraph breaks keep more thoughts intact than
         splitting on a character count?
     """
-    return fallback_split(documents)
+    # One thread = one chunk. Each file in advice_threads is a single thread
+    # whose THREAD: title carries the question the replies answer, so cutting
+    # anywhere inside it separates answers from their question. Every thread
+    # measures 317-793 characters, under the embedding model's ~1000 character
+    # limit, so nothing needs splitting. If a longer thread ever shows up, the
+    # right move is one chunk per reply with the THREAD: line prepended.
+    return [
+        Chunk(
+            text=doc.text.strip(),
+            source=doc.source,
+            index=0,
+            produced_by="chunker.py::split_documents",
+        )
+        for doc in documents
+    ]
 
 
 def describe(chunks: list[Chunk]) -> str:

@@ -21,13 +21,46 @@ Swap them for your own if you like. Keep five of them either way: criterion 3
 names a target of "4 of 5", and four of three is not a thing.
 """
 
+# expects can hold alternatives separated by | — the scorer passes the answer
+# if any one of them appears. Each question tests a different failure mode:
+# a plain fact, a paraphrase that shares no words with the thread, a number,
+# a number the corpus writes as a word, and a thread whose replies disagree.
 QUESTIONS = [
-    # {"question": "...", "expects": "..."},
-    {"question": "", "expects": ""},
-    {"question": "", "expects": ""},
-    {"question": "", "expects": ""},
-    {"question": "", "expects": ""},
-    {"question": "", "expects": ""},
+    {
+        # plain fact lookup
+        "question": "How much RAM do students say you actually need for CS courses?",
+        "expects": "16",
+    },
+    {
+        # paraphrase: "washing machine" never appears in the thread, "laundry" does
+        "question": "What time of week is it easiest to find an open washing machine in the dorms?",
+        "expects": "Tuesday|Wednesday",
+    },
+    {
+        # numeric fact
+        "question": "How many black and white pages does the printing quota cover?",
+        "expects": "600",
+    },
+    {
+        # the corpus says "two per year" in words, the model may answer in digits
+        "question": "How many courses can I take pass fail in a year?",
+        "expects": "two|2",
+    },
+    {
+        # the thread's replies disagree; a good answer mentions the seasonal catch
+        "question": "Is it worth getting a bike to shorten my walk to campus?",
+        "expects": "winter|salt|season|September",
+    },
+]
+
+# Criterion 5 questions: each targets a thread whose replies disagree, and a
+# good answer has to reflect both positions instead of picking one. The bike
+# question also lives in QUESTIONS; these are judged by reading the answers,
+# not by the substring scorer, so they stay out of the scored list.
+CONFLICT_QUESTIONS = [
+    "Is it worth getting a bike to shorten my walk to campus?",
+    "Is a parking permit worth getting?",
+    "Does the edition of the textbook matter?",
 ]
 
 # Questions from a different world entirely. Your gate should refuse all five.

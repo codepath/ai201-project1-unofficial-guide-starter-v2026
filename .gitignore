@@ -1,6 +1,6 @@
 # API keys — never commit these
 .env
-
+.env.example
 # Python
 __pycache__/
 *.py[cod]
