@@ -81,23 +81,47 @@ def fallback_split(
 
 
 def split_documents(documents: list[Document]) -> list[Chunk]:
-    """
-    Split documents into chunks. ⚠️ REPLACE THE BODY OF THIS IN MILESTONE 3.
+    """Group up to three body sentences and repeat the source title for context."""
+    import re
 
-    Right now it just calls the fallback. That is the plain, generic behaviour
-    the brief is talking about.
+    chunks: list[Chunk] = []
 
-    When you write your own strategy, set `produced_by` to
-    "chunker.py::split_documents" so your README's Sample Chunks section names
-    the right function. `app.py chunks` prints that string for you.
+    for doc in documents:
+        lines = doc.text.strip().split("\n", 1)
+        title = lines[0].strip()
+        body = lines[1].strip() if len(lines) > 1 else ""
 
-    Things worth thinking about before you write any code:
-      - Are your documents short posts or long guides?
-      - Is the useful information in one sentence, or spread over a paragraph?
-      - Would splitting on paragraph breaks keep more thoughts intact than
-        splitting on a character count?
-    """
-    return fallback_split(documents)
+        sentences = [
+            sentence.strip()
+            for sentence in re.split(r"(?<=[.!?])\s+", body)
+            if sentence.strip()
+        ]
+
+        if not sentences:
+            if title:
+                chunks.append(
+                    Chunk(
+                        text=title,
+                        source=doc.source,
+                        index=0,
+                        produced_by="chunker.py::split_documents",
+                    )
+                )
+            continue
+
+        for start in range(0, len(sentences), 3):
+            text = title + "\n\n" + " ".join(sentences[start:start + 3])
+
+            chunks.append(
+                Chunk(
+                    text=text,
+                    source=doc.source,
+                    index=start // 3,
+                    produced_by="chunker.py::split_documents",
+                )
+            )
+
+    return chunks
 
 
 def describe(chunks: list[Chunk]) -> str:
