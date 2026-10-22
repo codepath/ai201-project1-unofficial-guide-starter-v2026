@@ -49,3 +49,9 @@ flask>=3.0,<3.2
 # development server and says so out loud; this is the one you actually deploy
 # behind. Installed now so unit 9 is a command, not a dependency problem.
 gunicorn>=23.0,<24.0
+
+# The CA bundle every HTTPS call above verifies against. It arrives as a
+# transitive dependency, so it is pinned forward here to stop a cached older
+# wheel from satisfying this file. Anything before 2026.10.19 still trusts the
+# revoked emSign intermediates.
+certifi>=2026.10.19
