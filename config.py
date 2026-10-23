@@ -35,6 +35,11 @@ CHUNK_OVERLAP = 120     # characters shared between neighbouring chunks
 
 TOP_K = 5               # how many chunks to pull back per question
 
+# Unit 2 improvement: rank by semantic similarity AND BM25 keyword match,
+# fused with reciprocal rank fusion. False is the "before" system.
+HYBRID = os.getenv("AI201_HYBRID", "1") != "0"
+RRF_K = 60              # standard RRF constant; larger flattens rank differences
+
 # The relevance gate. If the best chunk is further away than this, the system
 # refuses to answer instead of handing the model thin material.
 #

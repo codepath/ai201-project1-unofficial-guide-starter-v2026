@@ -18,6 +18,7 @@ rest of the project if they were wrong:
 """
 
 import os
+import re
 import shutil
 from dataclasses import dataclass
 
@@ -199,10 +200,10 @@ def search(
             f"No index called '{name}'. Run `python app.py index` first."
         ) from exc
 
-    raw = collection.query(
-        query_embeddings=embed([question]),
-        n_results=min(top_k, collection.count()),
-    )
+    # Hybrid needs every chunk's semantic rank, not just the top k, so it can
+    # promote a chunk that BM25 likes but the embedding put further down.
+    n = collection.count() if config.HYBRID else min(top_k, collection.count())
+    raw = collection.query(query_embeddings=embed([question]), n_results=n)
 
     results: list[Result] = []
     for text, meta, distance in zip(
@@ -217,7 +218,40 @@ def search(
                 produced_by=str(meta.get("produced_by", "unknown")),
             )
         )
-    return results
+
+    if config.HYBRID:
+        results = _fuse_with_bm25(question, results)
+    return results[:top_k]
+
+
+def _tokens(text: str) -> list[str]:
+    return re.findall(r"[a-z0-9]+", text.lower())
+
+
+def _fuse_with_bm25(question: str, semantic: list[Result]) -> list[Result]:
+    """
+    Reciprocal rank fusion of the semantic ranking and a BM25 ranking.
+
+    Each chunk scores 1/(RRF_K + rank) from each list, and the sums decide the
+    order. Distances are left as the cosine distances, so the relevance gate
+    still measures meaning — only the ORDER of results changes.
+    """
+    from rank_bm25 import BM25Okapi
+
+    bm25 = BM25Okapi([_tokens(r.text) for r in semantic])
+    keyword = bm25.get_scores(_tokens(question))
+    keyword_rank = {
+        i: rank for rank, i in enumerate(
+            sorted(range(len(semantic)), key=lambda i: -keyword[i]), start=1
+        )
+    }
+    # `semantic` arrives nearest-first, so position i is semantic rank i + 1.
+    fused = {
+        i: 1 / (config.RRF_K + i + 1) + 1 / (config.RRF_K + keyword_rank[i])
+        for i in range(len(semantic))
+    }
+    order = sorted(range(len(semantic)), key=lambda i: -fused[i])
+    return [semantic[i] for i in order]
 
 
 def index_exists(corpus: str | None = None, variant: str = "default") -> bool:

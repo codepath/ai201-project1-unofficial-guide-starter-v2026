@@ -21,13 +21,41 @@ Swap them for your own if you like. Keep five of them either way: criterion 3
 names a target of "4 of 5", and four of three is not a thing.
 """
 
+# `answer_in` names the document(s) that actually hold the answer. Criterion 1
+# and criterion 4 are checked against it, so "did retrieval find it" is a yes/no
+# rather than a judgment call.
 QUESTIONS = [
-    # {"question": "...", "expects": "..."},
-    {"question": "", "expects": ""},
-    {"question": "", "expects": ""},
-    {"question": "", "expects": ""},
-    {"question": "", "expects": ""},
-    {"question": "", "expects": ""},
+    # Easy baseline: one document, distinctive vocabulary.
+    {
+        "question": "How often does the campus shuttle run on weekends?",
+        "expects": "40 minutes",
+        "answer_in": ["transit_shuttle.txt"],
+    },
+    # Seven laundry posts are near-identical apart from the prices.
+    {
+        "question": "How much does it cost to use a dryer in Morrow House?",
+        "expects": "$1.25",
+        "answer_in": ["housing_morrow_house_laundry.txt", "housing_morrow_house.txt"],
+    },
+    # Dropping and withdrawing are two different deadlines in two documents.
+    {
+        "question": "What is the last week you can withdraw from a course?",
+        "expects": "week ten",
+        "answer_in": ["admin_withdrawal_deadline.txt"],
+    },
+    # Seven housing noise posts all say "the library is open until 2am" —
+    # the reading-week hours are only in one place.
+    {
+        "question": "How late is the library open during reading week?",
+        "expects": "10pm",
+        "answer_in": ["study_library_hours.txt"],
+    },
+    # Needs two documents at once to compare.
+    {
+        "question": "Is a cash meal cheaper at Halden Hall or Kestrel Commons?",
+        "expects": "Halden",
+        "answer_in": ["dining_halden_hall.txt", "dining_kestrel_commons.txt"],
+    },
 ]
 
 # Questions from a different world entirely. Your gate should refuse all five.
